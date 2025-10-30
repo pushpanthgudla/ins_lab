@@ -1,0 +1,74 @@
+Procedure:
+1. Install Snort
+sudo apt update
+sudo apt install snort
+
+ 
+
+Updates package info and installs Snort IDS on your machine.
+
+
+
+
+
+
+
+
+
+2. Check network interfaces: 
+Lists all network interfaces (like lo, eth0, enp1s0) available on your system. Helps you identify which interface Snort should monitor.
+ip link show
+
+ 
+
+3. Edit Snort configuration:
+Opens Snort’s main configuration file to verify or modify rule paths and variables.
+Ensure $RULE_PATH points to /etc/snort/rules and confirm the correct network interface and rule files are included.
+This step ensures Snort knows where to find your rules and how to monitor traffic.
+
+
+
+
+
+4. Add local rules:
+Used to create custom detection rules that trigger alerts based on specific traffic patterns or keywords.
+For example, the following rules detect the word “attack” in TCP, UDP, and IP payloads:sudo nano /etc/snort/rules/local.rules
+
+
+
+Example rules (detect “attack” in TCP/UDP/IP payloads):
+alert tcp any any -> any any (msg:"Possible attack detected"; content:"attack"; nocase; sid:1000001; rev:1;)
+alert udp any any -> any any (msg:"Possible attack detected in UDP"; content:"attack"; nocase; sid:1000002; rev:1;)
+alert ip any any -> any any (msg:"Possible attack detected in any IP"; content:"attack"; nocase; sid:1000003; rev:1;)
+Custom local rules enable you to detect specific traffic patterns or keywords.
+
+
+
+
+
+
+
+
+
+
+5. Test Snort configuration:
+Tests the Snort configuration and rule syntax without actually running the IDS. It’s useful to confirm there are no errors before live monitoring. If successful, Snort will show “Snort successfully validated the configuration!”
+sudo snort -c /etc/snort/snort.conf -T
+
+ 
+
+6. Run Snort in console mode on a chosen interface:
+Runs Snort in live mode, showing alerts directly in the terminal. The -q flag suppresses unnecessary output for clarity, and <interface> is your chosen network interface (like lo or enp1s0). Useful for real-time monitoring and quick testing.
+sudo snort -A console -q -c /etc/snort/snort.conf -i <interface>
+
+ 
+
+7. Send test UDP traffic with keyword “attack”
+Sends a UDP packet containing the keyword “attack” to the loopback address (127.0.0.1).
+If your rules are correct, Snort will detect this and trigger an alert.
+This step validates that your custom rules are working as expected.
+echo "this is an attack" | nc -u -w1 127.0.0.1 12345
+
+
+8. Verify Snort alerts
+Check the Snort console or logs to confirm that alerts were generated.
